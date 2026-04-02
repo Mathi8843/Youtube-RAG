@@ -16,13 +16,20 @@ load_dotenv()
 # ── Multilingual Embeddings ────────────────────────────────────────────────────
 class SentenceTransformerEmbeddings(Embeddings):
     def __init__(self, model_name: str = "paraphrase-multilingual-MiniLM-L12-v2"):
-        self.model = SentenceTransformer(model_name)
+        self.model_name = model_name
+        self._model = None
+
+    def _get_model(self) -> SentenceTransformer:
+        """Lazy-load the SentenceTransformer model on first use."""
+        if self._model is None:
+            self._model = SentenceTransformer(self.model_name)
+        return self._model
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
-        return self.model.encode(texts).tolist()
+        return self._get_model().encode(texts).tolist()
 
     def embed_query(self, text: str) -> List[float]:
-        return self.model.encode([text])[0].tolist()
+        return self._get_model().encode([text])[0].tolist()
 
 
 # ── Timestamp Utilities ────────────────────────────────────────────────────────
@@ -68,25 +75,27 @@ class RAGService:
     COLLECTION_NAME = "youtube_rag_kb"
 
     def __init__(self):
-        self.embeddings = SentenceTransformerEmbeddings("paraphrase-multilingual-MiniLM-L12-v2")
         self.persist_directory = "./chroma_db"
+        self._embeddings: Optional[SentenceTransformerEmbeddings] = None
         self._vectorstore: Optional[Chroma] = None
 
         # In-memory video registry: { video_id -> {title, url} }
         self.video_registry: Dict[str, dict] = {}
 
-        api_key = os.getenv("GROQ_API_KEY")
         self.llm = None
-        if api_key and api_key != "your_groq_api_key_here":
-            self.llm = ChatGroq(model_name="llama-3.3-70b-versatile", api_key=api_key)
+        # LLM is initialised lazily via check_llm_ready()
 
     @property
     def vectorstore(self) -> Chroma:
-        """Lazily initialise shared ChromaDB collection."""
+        """Lazily initialise shared ChromaDB collection (and embeddings model)."""
         if self._vectorstore is None:
+            if self._embeddings is None:
+                self._embeddings = SentenceTransformerEmbeddings(
+                    "paraphrase-multilingual-MiniLM-L12-v2"
+                )
             self._vectorstore = Chroma(
                 collection_name=self.COLLECTION_NAME,
-                embedding_function=self.embeddings,
+                embedding_function=self._embeddings,
                 persist_directory=self.persist_directory,
             )
         return self._vectorstore
