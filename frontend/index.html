@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YouTube RAG — AI Video Intelligence</title>
+    <meta name="description" content="Ask questions across multiple YouTube videos with AI-powered RAG, timestamp-grounded answers." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <!-- ═══ VIEW 1: LANDING ════════════════════════════════════════════════ -->
+    <div id="view-landing" class="view view--active">
+      <nav class="nav">
+        <div class="nav__logo">
+          <span class="logo-icon">▶</span>
+          <span>YT<span class="logo-accent">RAG</span></span>
+        </div>
+        <a href="#" id="nav-cta" class="btn btn--sm">Try it free →</a>
+      </nav>
+
+      <div class="hero">
+        <div class="hero__badge">✦ Timestamps · Multi-Video · 50+ Languages · Groq LLaMA 3.3</div>
+        <h1 class="hero__title">
+          Ask <span class="gradient-text">anything</span><br/>
+          about any YouTube video
+        </h1>
+        <p class="hero__sub">
+          Paste YouTube URLs. Our AI extracts transcripts, builds a vector knowledge base, and answers your
+          questions with <strong>exact timestamp sources</strong> — across multiple videos at once.
+        </p>
+        <div class="hero__cta-group">
+          <button id="hero-cta-btn" class="btn btn--lg btn--glow">
+            <span>Build Knowledge Base</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+        <div class="hero__steps">
+          <div class="step"><div class="step__icon">📋</div><div><div class="step__title">1. Add Videos</div><div class="step__desc">One or many YouTube URLs</div></div></div>
+          <div class="step__divider">→</div>
+          <div class="step"><div class="step__icon">🧠</div><div><div class="step__title">2. AI Indexes</div><div class="step__desc">Transcript → Timed Chunks → VectorDB</div></div></div>
+          <div class="step__divider">→</div>
+          <div class="step"><div class="step__icon">📍</div><div><div class="step__title">3. Get Grounded Answers</div><div class="step__desc">Answer + exact video timestamps</div></div></div>
+        </div>
+      </div>
+
+      <div class="features">
+        <div class="feature-card">
+          <div class="feature-card__icon">📍</div>
+          <div class="feature-card__title">Timestamp Citations</div>
+          <div class="feature-card__desc">Every answer comes with the exact minute:second in the video where the information was found. Click to jump right there.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card__icon">📚</div>
+          <div class="feature-card__title">Multi-Video Knowledge Base</div>
+          <div class="feature-card__desc">Index multiple videos and ask cross-video questions. "Which video explains transformers better?" — your AI knows.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card__icon">🌍</div>
+          <div class="feature-card__title">50+ Languages</div>
+          <div class="feature-card__desc">Works with Tamil, Hindi, Spanish, Arabic and more. Ask in any language, get answers in that same language.</div>
+        </div>
+      </div>
+
+      <footer class="footer">Built with FastAPI · SentenceTransformers · LangChain · ChromaDB · Groq</footer>
+    </div>
+
+    <!-- ═══ VIEW 2: KNOWLEDGE BASE BUILDER ═══════════════════════════════ -->
+    <div id="view-input" class="view">
+
+      <!-- Add Video Card -->
+      <div class="kb-layout">
+        <div class="card" style="position:relative;">
+          <div id="loader" class="loader-overlay">
+            <div class="spinner"></div>
+            <p id="loader-message">Extracting transcript &amp; building knowledge base…</p>
+            <p class="loader-sub">This may take 15–30 seconds</p>
+          </div>
+
+          <button id="back-to-landing" class="back-btn">← Back</button>
+
+          <div class="card__header">
+            <div class="card__icon">🗃️</div>
+            <h2 class="card__title">Knowledge Base Builder</h2>
+            <p class="card__sub">Add one or many YouTube videos — then ask questions across all of them</p>
+          </div>
+
+          <form id="url-form" class="url-form">
+            <div class="url-input-wrap">
+              <span class="url-input-icon">🔗</span>
+              <input type="url" id="youtube-url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off" />
+            </div>
+            <button type="submit" class="btn btn--lg btn--full btn--glow" id="add-btn">
+              <span>+ Add to Knowledge Base</span>
+            </button>
+          </form>
+          <div id="setup-error" class="error-text"></div>
+
+          <div class="url-examples">
+            <span class="url-examples__label">Examples:</span>
+            <button class="pill" data-url="https://www.youtube.com/watch?v=6M5VXKLf4D4">Deep Learning</button>
+            <button class="pill" data-url="https://www.youtube.com/watch?v=aircAruvnKk">Neural Networks</button>
+            <button class="pill" data-url="https://www.youtube.com/watch?v=PaCmpygFfXo">Attention Is All You Need</button>
+          </div>
+        </div>
+
+        <!-- Indexed Videos Panel -->
+        <div class="kb-panel">
+          <div class="kb-panel__header">
+            <h3 class="kb-panel__title">📚 Knowledge Base</h3>
+            <span id="video-count" class="kb-count">0 videos</span>
+          </div>
+
+          <div id="video-list" class="video-list">
+            <div class="video-list__empty">
+              <div style="font-size:2.5rem;margin-bottom:12px;">🎬</div>
+              <div>No videos added yet.</div>
+              <div style="font-size:0.8rem;color:var(--muted);margin-top:6px;">Add a YouTube URL to get started.</div>
+            </div>
+          </div>
+
+          <button id="start-chat-btn" class="btn btn--lg btn--full btn--glow" disabled>
+            Start Chatting →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ VIEW 3: CHAT ══════════════════════════════════════════════════ -->
+    <div id="view-chat" class="view">
+      <div class="chat-layout">
+        <!-- Top bar -->
+        <div class="chat-topbar">
+          <button id="back-to-input" class="back-btn">← Add More Videos</button>
+          <div class="chat-topbar__filters" id="video-filters">
+            <!-- Filter chips injected here -->
+          </div>
+          <div class="chat-topbar__badge">🟢 RAG Active</div>
+        </div>
+
+        <!-- Tools bar -->
+        <div class="tools-bar">
+          <button id="notes-btn" class="tool-btn">
+            <span>📝</span> Generate Notes
+          </button>
+          <button id="moments-btn" class="tool-btn">
+            <span>🎯</span> Key Moments
+          </button>
+          <span class="tools-bar__hint" id="tools-hint"></span>
+        </div>
+
+        <!-- Messages -->
+        <div id="chat-history" class="chat-history">
+          <div class="message ai-msg">
+            <div class="msg-avatar">AI</div>
+            <div class="msg-content">
+              <div class="msg-bubble">Hello! I've indexed your video knowledge base. Ask me anything — I'll answer with exact timestamps from the source.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Input -->
+        <div class="chat-input-area">
+          <form id="chat-form" class="chat-form">
+            <input type="text" id="chat-input" placeholder="e.g., What does the video say about neural networks?" required autocomplete="off" />
+            <button type="submit" class="btn btn--send" id="send-btn">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2L15 22 11 13 2 9l20-7z"/></svg>
+            </button>
+          </form>
+          <div id="chat-error" class="error-text"></div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
