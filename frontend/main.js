@@ -1,41 +1,41 @@
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = 'https://youtube-rag-production.up.railway.app';
 
 // ── State ──────────────────────────────────────────────────────────────────
 const knowledgeBase = [];    // [{ video_id, video_title, video_url }]
-let activeVideoIds  = [];    // [] = all videos, else filtered list
+let activeVideoIds = [];    // [] = all videos, else filtered list
 
 // ── DOM ────────────────────────────────────────────────────────────────────
-const viewLanding   = document.getElementById('view-landing');
-const viewInput     = document.getElementById('view-input');
-const viewChat      = document.getElementById('view-chat');
+const viewLanding = document.getElementById('view-landing');
+const viewInput = document.getElementById('view-input');
+const viewChat = document.getElementById('view-chat');
 
-const navCta        = document.getElementById('nav-cta');
-const heroCta       = document.getElementById('hero-cta-btn');
+const navCta = document.getElementById('nav-cta');
+const heroCta = document.getElementById('hero-cta-btn');
 const backToLanding = document.getElementById('back-to-landing');
-const backToInput   = document.getElementById('back-to-input');
+const backToInput = document.getElementById('back-to-input');
 
-const urlForm       = document.getElementById('url-form');
-const youtubeUrl    = document.getElementById('youtube-url');
-const setupError    = document.getElementById('setup-error');
-const addBtn        = document.getElementById('add-btn');
+const urlForm = document.getElementById('url-form');
+const youtubeUrl = document.getElementById('youtube-url');
+const setupError = document.getElementById('setup-error');
+const addBtn = document.getElementById('add-btn');
 
-const loader        = document.getElementById('loader');
-const loaderMsg     = document.getElementById('loader-message');
+const loader = document.getElementById('loader');
+const loaderMsg = document.getElementById('loader-message');
 
-const videoList     = document.getElementById('video-list');
-const videoCount    = document.getElementById('video-count');
-const startChatBtn  = document.getElementById('start-chat-btn');
+const videoList = document.getElementById('video-list');
+const videoCount = document.getElementById('video-count');
+const startChatBtn = document.getElementById('start-chat-btn');
 
-const chatHistory   = document.getElementById('chat-history');
-const chatForm      = document.getElementById('chat-form');
-const chatInput     = document.getElementById('chat-input');
-const chatError     = document.getElementById('chat-error');
-const sendBtn       = document.getElementById('send-btn');
-const videoFilters  = document.getElementById('video-filters');
+const chatHistory = document.getElementById('chat-history');
+const chatForm = document.getElementById('chat-form');
+const chatInput = document.getElementById('chat-input');
+const chatError = document.getElementById('chat-error');
+const sendBtn = document.getElementById('send-btn');
+const videoFilters = document.getElementById('video-filters');
 
-const notesBtn      = document.getElementById('notes-btn');
-const momentsBtn    = document.getElementById('moments-btn');
-const toolsHint     = document.getElementById('tools-hint');
+const notesBtn = document.getElementById('notes-btn');
+const momentsBtn = document.getElementById('moments-btn');
+const toolsHint = document.getElementById('tools-hint');
 
 // ── View Switching ─────────────────────────────────────────────────────────
 function showView(view) {
@@ -44,10 +44,10 @@ function showView(view) {
   window.scrollTo(0, 0);
 }
 
-navCta.addEventListener('click',  (e) => { e.preventDefault(); showView(viewInput); });
+navCta.addEventListener('click', (e) => { e.preventDefault(); showView(viewInput); });
 heroCta.addEventListener('click', () => showView(viewInput));
 backToLanding.addEventListener('click', () => showView(viewLanding));
-backToInput.addEventListener('click',   () => showView(viewInput));
+backToInput.addEventListener('click', () => showView(viewInput));
 
 // ── Example Pills ──────────────────────────────────────────────────────────
 document.querySelectorAll('.pill').forEach(p => {
@@ -82,9 +82,9 @@ urlForm.addEventListener('submit', async (e) => {
     // Avoid duplicates in local KB
     if (!knowledgeBase.find(v => v.video_id === data.video_id)) {
       knowledgeBase.push({
-        video_id:    data.video_id,
+        video_id: data.video_id,
         video_title: data.video_title,
-        video_url:   data.video_url
+        video_url: data.video_url
       });
       renderVideoList();
     }
