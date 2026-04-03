@@ -18,6 +18,11 @@ app.add_middleware(
 )
 
 
+@app.get("/")
+async def root():
+    return {"status": "ok", "message": "YouTube RAG API is running"}
+
+
 class ProcessRequest(BaseModel):
     url: str
 
