@@ -1,4 +1,4 @@
-const BASE_URL = 'https://youtube-rag-production.up.railway.app';
+const BASE_URL = '';
 
 // ── State ──────────────────────────────────────────────────────────────────
 const knowledgeBase = [];    // [{ video_id, video_title, video_url }]

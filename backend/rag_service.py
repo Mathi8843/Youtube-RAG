@@ -75,7 +75,7 @@ class RAGService:
     COLLECTION_NAME = "youtube_rag_kb"
 
     def __init__(self):
-        self.persist_directory = "./chroma_db"
+        self.persist_directory = "/tmp/chroma_db"
         self._embeddings: Optional[SentenceTransformerEmbeddings] = None
         self._vectorstore: Optional[Chroma] = None
 
