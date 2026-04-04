@@ -1,4 +1,4 @@
-const BASE_URL = '';
+const BASE_URL = 'https://rotten-chefs-dream.loca.lt';
 
 // ── State ──────────────────────────────────────────────────────────────────
 const knowledgeBase = [];    // [{ video_id, video_title, video_url }]
