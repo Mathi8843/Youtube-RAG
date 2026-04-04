@@ -51,18 +51,18 @@ def create_timed_chunks(snippets, target_chars: int = 900, overlap_chars: int = 
 
     chunks = []
     current_text = ""
-    current_start = snippets[0].start
+    current_start = snippets[0]["start"]
 
     for snippet in snippets:
-        if len(current_text) + len(snippet.text) > target_chars and current_text:
+        if len(current_text) + len(snippet["text"]) > target_chars and current_text:
             chunks.append({"text": current_text.strip(), "start": current_start})
             # Overlap: keep last N chars for context continuity
-            current_text = current_text[-overlap_chars:] + " " + snippet.text
-            current_start = snippet.start
+            current_text = current_text[-overlap_chars:] + " " + snippet["text"]
+            current_start = snippet["start"]
         else:
             if not current_text:
-                current_start = snippet.start
-            current_text += " " + snippet.text
+                current_start = snippet["start"]
+            current_text += " " + snippet["text"]
 
     if current_text.strip():
         chunks.append({"text": current_text.strip(), "start": current_start})
@@ -169,23 +169,11 @@ class RAGService:
             # 1. Title
             title = self.get_video_title(video_id)
 
-            # 2. Transcript (any language)
-            ytt_api = YouTubeTranscriptApi()
-            transcript_list = ytt_api.list(video_id)
-
-            fetched = None
-            try:
-                for t in transcript_list:
-                    if not t.is_generated:
-                        fetched = t.fetch()
-                        break
-            except Exception:
-                pass
-            if fetched is None:
-                fetched = ytt_api.fetch(video_id)
+            # 2. Transcript (any language) — use static method compatible with all versions
+            fetched = YouTubeTranscriptApi.get_transcript(video_id)
 
             # 3. Timestamp-aware chunking
-            timed_chunks = create_timed_chunks(list(fetched), target_chars=900, overlap_chars=150)
+            timed_chunks = create_timed_chunks(fetched, target_chars=900, overlap_chars=150)
 
             # 4. Store in shared Chroma collection with full metadata
             texts = [c["text"] for c in timed_chunks]
