@@ -11,7 +11,7 @@ app = FastAPI(title="YouTube RAG API — Multi-Video with Timestamps")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    app.add_middleware(CORSMiddleware, allow_origins=['http://example1.com', 'http://example2.com'])
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
